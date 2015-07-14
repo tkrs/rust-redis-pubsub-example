@@ -1,0 +1,7 @@
+[package]
+name = "first_rust_redis"
+version = "0.1.0"
+authors = ["Takeru Sato <midium.size@gmail.com>"]
+
+[dependencies.redis]
+git = "https://github.com/mitsuhiko/redis-rs.git"
