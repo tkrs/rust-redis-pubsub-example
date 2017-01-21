@@ -21,8 +21,7 @@ fn subscribe(ctx: Ctx) -> thread::JoinHandle<()> {
     thread::spawn(move || {
         let mut ps = ctx.pubsub();
 
-        ps.subscribe("channel_1").unwrap();
-        ps.subscribe("channel_2").unwrap();
+        ps.subscribe("boo").unwrap();
 
         println!("Subscriber is ready.");
 
@@ -42,9 +41,9 @@ fn publish(ctx: Ctx) {
     thread::spawn(move || {
         let con = ctx.client.get_connection().unwrap();
 
-        for x in 0..15 {
+        for x in 0..10 {
             redis::cmd("PUBLISH")
-                .arg("channel_1")
+                .arg("boo")
                 .arg(x)
                 .execute(&con);
         }
