@@ -10,7 +10,9 @@ struct Ctx {
 impl Ctx {
     fn new() -> Ctx {
         let client = redis::Client::open("redis://localhost/").unwrap();
-        Ctx { client: client }
+        Ctx {
+            client: client,
+        }
     }
     fn pubsub(&self) -> redis::PubSub {
         self.client.get_pubsub().unwrap()
@@ -28,11 +30,10 @@ fn subscribe(ctx: Ctx) -> thread::JoinHandle<()> {
 
         loop {
             let msg = ps.get_message().unwrap();
-            let ch = msg.get_channel_name();
             let payload: String = msg.get_payload().unwrap();
             match payload.as_ref() {
                 "10" => break,
-                a => println!("Channel: '{}' recieved '{}'.", ch, a),
+                a    => println!("Channel: '{}' recieved '{}'.", msg.get_channel_name(), a),
             }
         }
     })
@@ -42,11 +43,8 @@ fn publish(ctx: Ctx) {
     thread::spawn(move || {
         let con = ctx.client.get_connection().unwrap();
 
-        for x in 0..15 {
-            redis::cmd("PUBLISH")
-                .arg("channel_1")
-                .arg(x)
-                .execute(&con);
+        for x  in 0..15 {
+            redis::cmd("PUBLISH").arg("channel_1").arg(x).execute(&con);
         }
     });
 }

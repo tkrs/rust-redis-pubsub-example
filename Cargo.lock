@@ -1,5 +1,5 @@
 [root]
-name = "first_rust_redis"
+name = "rust-redis-pubsub-example"
 version = "0.1.0"
 dependencies = [
  "redis 0.5.4 (registry+https://github.com/rust-lang/crates.io-index)",

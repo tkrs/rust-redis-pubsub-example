@@ -1,5 +1,5 @@
 [package]
-name = "first_rust_redis"
+name = "rust-redis-pubsub-example"
 version = "0.1.0"
 authors = ["Takeru Sato <type.in.type@gmail.com>"]
 
