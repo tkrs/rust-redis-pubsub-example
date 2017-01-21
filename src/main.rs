@@ -41,7 +41,7 @@ fn publish(ctx: Ctx) {
     thread::spawn(move || {
         let con = ctx.client.get_connection().unwrap();
 
-        for x in 0..10 {
+        for x in 0..11 {
             redis::cmd("PUBLISH")
                 .arg("boo")
                 .arg(x)
