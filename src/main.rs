@@ -31,7 +31,7 @@ fn subscribe(ctx: Ctx) -> thread::JoinHandle<()> {
             let payload: String = msg.get_payload().unwrap();
             match payload.as_ref() {
                 "10" => break,
-                a => println!("Channel: '{}' recieved '{}'.", ch, a),
+                a => println!("Channel: '{}' received '{}'.", ch, a),
             }
         }
     })
