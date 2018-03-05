@@ -58,5 +58,4 @@ fn main() {
     publish(Ctx::new());
 
     handle.join().unwrap();
-
 }
