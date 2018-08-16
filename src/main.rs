@@ -1,23 +1,37 @@
 extern crate redis;
 
-use redis::{Client, ControlFlow, PubSubCommands};
+use redis::{Client, Commands, ControlFlow, PubSubCommands};
+use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
+trait AppState {
+    fn client(&self) -> &Arc<Client>;
+}
+
 struct Ctx {
-    pub client: Client,
+    pub client: Arc<Client>,
 }
 
 impl Ctx {
     fn new() -> Ctx {
         let client = Client::open("redis://localhost/").unwrap();
-        Ctx { client: client }
+        Ctx {
+            client: Arc::new(client),
+        }
     }
 }
 
-fn subscribe(ctx: Ctx) -> thread::JoinHandle<()> {
+impl AppState for Ctx {
+    fn client(&self) -> &Arc<Client> {
+        &self.client
+    }
+}
+
+fn subscribe(state: &impl AppState) -> thread::JoinHandle<()> {
+    let client = Arc::clone(state.client());
     thread::spawn(move || {
-        let mut conn = ctx.client.get_connection().unwrap();
+        let mut conn = client.get_connection().unwrap();
 
         conn.subscribe(&["boo"], |msg| {
             let ch = msg.get_channel_name();
@@ -25,7 +39,7 @@ fn subscribe(ctx: Ctx) -> thread::JoinHandle<()> {
             match payload.as_ref() {
                 "10" => ControlFlow::Break(()),
                 a => {
-                    println!("Channel: '{}' received '{}'.", ch, a);
+                    println!("Channel '{}' received '{}'.", ch, a);
                     ControlFlow::Continue
                 }
             }
@@ -33,22 +47,26 @@ fn subscribe(ctx: Ctx) -> thread::JoinHandle<()> {
     })
 }
 
-fn publish(ctx: Ctx) {
+fn publish(state: &impl AppState) {
+    let client = Arc::clone(state.client());
     thread::spawn(move || {
-        let con = ctx.client.get_connection().unwrap();
+        let conn = client.get_connection().unwrap();
 
         for x in 0..11 {
-            redis::cmd("PUBLISH").arg("boo").arg(x).execute(&con);
+            thread::sleep(Duration::from_millis(500));
+            println!("Publish {} to boo.", x);
+            let _: () = conn.publish("boo", x).unwrap();
         }
     });
 }
 
 fn main() {
-    let handle = subscribe(Ctx::new());
+    let ctx = Ctx::new();
+    let handle = subscribe(&ctx);
 
     thread::sleep(Duration::from_millis(500));
 
-    publish(Ctx::new());
+    publish(&ctx);
 
     handle.join().unwrap();
 }
