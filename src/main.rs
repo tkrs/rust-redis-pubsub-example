@@ -63,10 +63,6 @@ fn publish(state: &impl AppState) {
 fn main() {
     let ctx = Ctx::new();
     let handle = subscribe(&ctx);
-
-    thread::sleep(Duration::from_millis(500));
-
     publish(&ctx);
-
     handle.join().unwrap();
 }
